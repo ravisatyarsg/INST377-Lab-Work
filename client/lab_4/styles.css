@@ -149,6 +149,7 @@
   .carousel__actions button {
     border-radius: 5px;
     border: 0;
+    font-weight: bold;
     cursor: pointer;
     width: 50px;
     height: 30px;
