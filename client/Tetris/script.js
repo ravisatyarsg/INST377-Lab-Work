@@ -1,327 +1,232 @@
-// Configuration
-const squareCount = 200;
-const width = 10;
-const displayWidth = 4;
-const lTetromino = [
-  [1, width + 1, width * 2 + 1, 2],
-  [width, width + 1, width + 2, width * 2 + 2],
-  [1, width + 1, width * 2 + 1, width * 2],
-  [width, width * 2, width * 2 + 1, width * 2 + 2]
-];
-const zTetromino = [
-  [0, width, width + 1, width * 2 + 1],
-  [width + 1, width + 2, width * 2, width * 2 + 1],
-  [0, width, width + 1, width * 2 + 1],
-  [width + 1, width + 2, width * 2, width * 2 + 1]
-];
-const tTetromino = [
-  [1, width, width + 1, width + 2],
-  [1, width + 1, width + 2, width * 2 + 1],
-  [width, width + 1, width + 2, width * 2 + 1],
-  [1, width, width + 1, width * 2 + 1]
-];
-const oTetromino = [
-  [0, 1, width, width + 1],
-  [0, 1, width, width + 1],
-  [0, 1, width, width + 1],
-  [0, 1, width, width + 1]
-];
-const iTetromino = [
-  [1, width + 1, width * 2 + 1, width * 3 + 1],
-  [width, width + 1, width + 2, width + 3],
-  [1, width + 1, width * 2 + 1, width * 3 + 1],
-  [width, width + 1, width + 2, width + 3]
-];
-
-// Event listeners
-document.addEventListener("DOMContentLoaded", () => {
-  // Variables
-  const tetrominoes = [lTetromino, zTetromino, tTetromino, oTetromino, iTetromino];
-  const upNextTetrominos = [
-    [1, displayWidth + 1, displayWidth * 2 + 1, 2], /* lTetromino */
-    [0, displayWidth, displayWidth + 1, displayWidth * 2 + 1], /* zTetromino */
-    [1, displayWidth, displayWidth + 1, displayWidth + 2], /* tTetromino */
-    [0, 1, displayWidth, displayWidth + 1], /* oTetromino */
-    [1, displayWidth + 1, displayWidth * 2 + 1, displayWidth * 3 + 1] /* iTetromino */
-  ];
+document.addEventListener('DOMContentLoaded', () => {
   const grid = document.querySelector('.grid');
-  const miniGrid = document.querySelector('.mini-grid');
-  const startBtn = document.querySelector("#start-button");
-  const difficulty = 500;
-  let squares = Array.from(buildUIGrids(grid, squareCount, squareCount - 10));
-  let miniSquares = Array.from(buildUIGrids(miniGrid, 20, 0));
+  let squares = Array.from(document.querySelectorAll('.grid div'));
+  const scoreDisplay = document.querySelector('#score');
+  const startBtn = document.querySelector('#start-button');
+  const width = 10;
+  let nextRandom = 0;
+  let timerId;
+  let score = 0;
+  const colors = [
+    'orange',
+    'red',
+    'purple',
+    'green',
+    'blue'
+  ];
+
+  const lTetromino = [
+    [1, width + 1, width * 2 + 1, 2],
+    [width, width + 1, width + 2, width * 2 + 2],
+    [1, width + 1, width * 2 + 1, width * 2],
+    [width, width * 2, width * 2 + 1, width * 2 + 2]
+  ];
+
+  const zTetromino = [
+    [0, width, width + 1, width * 2 + 1],
+    [width + 1, width + 2, width * 2, width * 2 + 1],
+    [0, width, width + 1, width * 2 + 1],
+    [width + 1, width + 2, width * 2, width * 2 + 1]
+  ];
+
+  const tTetromino = [
+    [1, width, width + 1, width + 2],
+    [1, width + 1, width + 2, width * 2 + 1],
+    [width, width + 1, width + 2, width * 2 + 1],
+    [1, width, width + 1, width * 2 + 1]
+  ];
+
+  const oTetromino = [
+    [0, 1, width, width + 1],
+    [0, 1, width, width + 1],
+    [0, 1, width, width + 1],
+    [0, 1, width, width + 1]
+  ];
+
+  const iTetromino = [
+    [1, width + 1, width * 2 + 1, width * 3 + 1],
+    [width, width + 1, width + 2, width + 3],
+    [1, width + 1, width * 2 + 1, width * 3 + 1],
+    [width, width + 1, width + 2, width + 3]
+  ];
+
+  const theTetrominoes = [lTetromino, zTetromino, tTetromino, oTetromino, iTetromino];
+
   let currentPosition = 4;
   let currentRotation = 0;
-  let nextRandom = 0;
-  let random = 0;
-  let current = tetrominoes[0][0];
-  let timerID = null;
-  let displayIndex = 0;
-  let score = 0;
 
-  /**
-   * Redraw the current tetromino position
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:11:44-040
-   */
+  console.log(theTetrominoes[0][0]);
+
+  let random = Math.floor(Math.random() * theTetrominoes.length);
+  let current = theTetrominoes[random][currentRotation];
+
   function draw() {
-    // Loop through new position and add class
-    current.forEach((i) => {
-      squares[currentPosition + i].classList.add("tetromino");
+    current.forEach((index) => {
+      squares[currentPosition + index].classList.add('tetromino');
+      squares[currentPosition + index].style.backgroundColor = colors[random];
     });
   }
 
-  /**
-   * Remove the current tetromino divs
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:11:29-040
-   */
   function undraw() {
-    // Loop through current position and remove class
-    current.forEach((i) => {
-      squares[currentPosition + i].classList.remove("tetromino");
+    current.forEach((index) => {
+      squares[currentPosition + index].classList.remove('tetromino');
+      squares[currentPosition + index].style.backgroundColor = '';
     });
   }
 
-  /**
-   * Move tetromino downward
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:11:18-040
-   */
+  function control(e) {
+    if (e.keyCode === 37) {
+      moveLeft();
+    } else if (e.keyCode === 38) {
+      rotate();
+    } else if (e.keyCode === 39) {
+      moveRight();
+    } else if (e.keyCode === 40) {
+      moveDown();
+    }
+  }
+  document.addEventListener('keyup', control);
+
   function moveDown() {
-    // Undraw div
     undraw();
-
-    // Move down
     currentPosition += width;
-
-    // Redraw and recalculate
     draw();
     freeze();
   }
 
-  /**
-   * Generate a new tetromino
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:11:06-040
-   */
   function freeze() {
-    // Iterate through current pieces, find end of game grid
-    if (current.some((i) => squares[currentPosition + i + width].classList.contains("taken"))) {
-      // Update classes for finished piece
-      current.forEach((i) => squares[currentPosition + i].classList.add("taken"));
-
-      // Find new tetromino piece
+    if (current.some((index) => squares[currentPosition + index + width].classList.contains('taken'))) {
+      current.forEach((index) => squares[currentPosition + index].classList.add('taken'));
       random = nextRandom;
-      nextRandom = Math.floor(Math.random() * tetrominoes.length);
-      current = tetrominoes[random][currentRotation];
+      nextRandom = Math.floor(Math.random() * theTetrominoes.length);
+      current = theTetrominoes[random][currentRotation];
       currentPosition = 4;
-
-      // Perorm recalculations
       draw();
-      displayNext();
+      displayShape();
       addScore();
       gameOver();
     }
   }
 
-  /**
-   * Move the current tetromino left
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:10:54-040
-   */
   function moveLeft() {
-    // Undraw position
     undraw();
-
-    // Move left if possible
-    if (!current.some((i) => (currentPosition + i) % width === 0)) {
-      currentPosition -= 1;
-    }
-    if (current.some((i) => squares[currentPosition + i].classList.contains("taken"))) {
+    const isAtLeftEdge = current.some((index) => (currentPosition + index) % width === 0);
+    if (!isAtLeftEdge) currentPosition -= 1;
+    if (current.some((index) => squares[currentPosition + index].classList.contains('taken'))) {
       currentPosition += 1;
     }
-
-    // Redraw
     draw();
   }
 
-  /**
-   * Move the current tetromino right
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:10:42-040
-   */
   function moveRight() {
-    // Undraw position
     undraw();
-
-    // Move right if possible
-    if (!current.some((i) => (currentPosition + i) % width === width - 1)) {
-      currentPosition += 1;
-    }
-    if (current.some((i) => squares[currentPosition + i].classList.contains("taken"))) {
+    const isAtRightEdge = current.some((index) => (currentPosition + index) % width === width - 1);
+    if (!isAtRightEdge) currentPosition += 1;
+    if (current.some((index) => squares[currentPosition + index].classList.contains('taken'))) {
       currentPosition -= 1;
     }
-
-    // Redraw position
     draw();
   }
 
-  /**
-   * Rotate the current tetromino
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:10:25-040
-   */
-  function rotate() {
-    // Undraw piece
-    undraw();
-
-    // Rotate clockwise
-    currentRotation++;
-    if (currentRotation === current.length) {
-      currentRotation = 0;
-    }
-
-    // Update rotation
-    current = tetrominoes[random][currentRotation];
-
-    // Redraw piece
-    draw();
+  function isAtRight() {
+    return current.some((index) => (currentPosition + index + 1) % width === 0);
   }
 
-  /**
-   * Handle IO controls
-   *
-   * @param {Event} input event
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:09:59-040
-   */
-  function control(e) {
-    switch (e.keyCode) {
-      case 37:
-        moveLeft();
-        break;
-      case 38:
-        rotate();
-        break;
-      case 39:
-        moveRight();
-        break;
-      case 40:
-        moveDown();
-        break;
-    }
+  function isAtLeft() {
+    return current.some((index) => (currentPosition + index) % width === 0);
   }
 
-  /**
-   * Display a upcoming tetromino
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:09:36-040
-   */
-  function displayNext() {
-    // Remove current tetromino piece
-    miniSquares.forEach((div) => {
-      div.classList.remove("tetromino");
-    });
-
-    // Redraw upcoming tetromino piece
-    upNextTetrominos[nextRandom].forEach((i) => {
-      miniSquares[displayIndex + i].classList.add("tetromino");
-    });
-  }
-
-  // Event listeners
-  document.addEventListener("keyup", control);
-  startBtn.addEventListener("click", () => {
-    if (timerID) {
-      clearInterval(timerID);
-      timerID = null;
-      startBtn.textContent = "Start Game";
-    } else {
-      draw();
-      timerID = setInterval(moveDown, difficulty);
-      nextRandom = Math.floor(Math.random() * tetrominoes.length);
-      startBtn.textContent = "Pause Game";
-      displayNext();
-    }
-  });
-
-  /**
-   * Keep track of game score
-   *
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:09:07-040
-   */
-  function addScore() {
-    // Iterate through each grid div
-    for (let i = 0; i < squareCount; i ++) {
-      const row = [i, i+1, i+2, i+3, i+4, i+5, i+6, i+7, i+8, i+9];
-
-      // Check if tetromino is at the end
-      if (row.every(idx => squares[idx].classList.contains("taken") && !squares[idx].classList.contains("immutable"))) {
-        score += 10;
-        document.querySelector("#score").textContent = score;
-        row.forEach(idx => {
-          squares[idx].classList.remove("taken", "tetromino");
-        });
-        const squaresRemoved = squares.splice(i, width);
-        squares = squaresRemoved.concat(squares);
-        squares.forEach(cell => grid.appendChild(cell));
+  function checkRotatedPosition(P) {
+    P = P || currentPosition;
+    if ((P + 1) % width < 4) {
+      if (isAtRight()) {
+        currentPosition += 1;
+        checkRotatedPosition(P);
+      }
+    } else if (P % width > 5) {
+      if (isAtLeft()) {
+        currentPosition -= 1;
+        checkRotatedPosition(P);
       }
     }
   }
 
-  /**
-   * Determine the end of the game
-   * @author Alec M. <https://amattu.com>
-   * @date 2021-10-06T11:08:30-040
-   */
+  // rotate the tetromino
+  function rotate() {
+    undraw();
+    currentRotation++;
+    if (currentRotation === current.length) {
+      currentRotation = 0;
+    }
+    current = theTetrominoes[random][currentRotation];
+    checkRotatedPosition();
+    draw();
+  }
+
+  const displaySquares = document.querySelectorAll('.mini-grid div');
+  const displayWidth = 4;
+  const displayIndex = 0;
+
+  // the Tetrominos without rotations
+  const upNextTetrominoes = [
+    [1, displayWidth + 1, displayWidth * 2 + 1, 2], // lTetromino
+    [0, displayWidth, displayWidth + 1, displayWidth * 2 + 1], // zTetromino
+    [1, displayWidth, displayWidth + 1, displayWidth + 2], // tTetromino
+    [0, 1, displayWidth, displayWidth + 1], // oTetromino
+    [1, displayWidth + 1, displayWidth * 2 + 1, displayWidth * 3 + 1] // iTetromino
+  ];
+
+  // display the shape in the mini-grid display
+  function displayShape() {
+    // remove any trace of a tetromino form the entire grid
+    displaySquares.forEach((square) => {
+      square.classList.remove('tetromino');
+      square.style.backgroundColor = '';
+    });
+    upNextTetrominoes[nextRandom].forEach((index) => {
+      displaySquares[displayIndex + index].classList.add('tetromino');
+      displaySquares[displayIndex + index].style.backgroundColor = colors[nextRandom];
+    });
+  }
+
+  // add functionality to the button
+  startBtn.addEventListener('click', () => {
+    if (timerId) {
+      clearInterval(timerId);
+      timerId = null;
+    } else {
+      draw();
+      timerId = setInterval(moveDown, 1000);
+      nextRandom = Math.floor(Math.random() * theTetrominoes.length);
+      displayShape();
+    }
+  });
+
+  // add score
+  function addScore() {
+    for (let i = 0; i < 199; i += width) {
+      const row = [i, i + 1, i + 2, i + 3, i + 4, i + 5, i + 6, i + 7, i + 8, i + 9];
+
+      if (row.every((index) => squares[index].classList.contains('taken'))) {
+        score += 10;
+        scoreDisplay.innerHTML = score;
+        row.forEach((index) => {
+          squares[index].classList.remove('taken');
+          squares[index].classList.remove('tetromino');
+          squares[index].style.backgroundColor = '';
+        });
+        const squaresRemoved = squares.splice(i, width);
+        squares = squaresRemoved.concat(squares);
+        squares.forEach((cell) => grid.appendChild(cell));
+      }
+    }
+  }
+
+  // game over
   function gameOver() {
-    // Check if tetromino is at the top of the grid
-    if (current.some(index => squares[currentPosition + index].classList.contains("taken"))) {
-      document.querySelector("#score").textContent = "Over";
-      clearInterval(timerID);
+    if (current.some((index) => squares[currentPosition + index].classList.contains('taken'))) {
+      scoreDisplay.innerHTML = 'end';
+      clearInterval(timerId);
     }
   }
 });
-
-/**
- * Append 200 divs to the game grid
- *
- * @param {DOMElement} container
- * @param {integer} number of squares
- * @param {integer} pad the last N elements with class "taken"
- * @return {HTMLCollection} grid children
- * @author Alec M. <https://amattu.com>
- * @date 2021-10-06T09:15:17-040
- */
-function buildUIGrids(container, number, pad) {
-  // Create a placeholder fragment
-  const fragment = document.createDocumentFragment();
-
-  // Create N elements
-  for (let i = 0; i < number; i++) {
-    const div = document.createElement('div');
-
-    // Add classes to element if needed
-    if (pad && i >= pad)
-      div.classList.add('taken', 'immutable');
-
-    // Append to fragment
-    fragment.appendChild(div);
-  }
-
-  // Append fragment to container (grid)
-  container.appendChild(fragment);
-
-  // Return children
-  return container.children;
-}
