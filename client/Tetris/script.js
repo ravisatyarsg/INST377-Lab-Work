@@ -151,7 +151,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // rotate the tetromino
   function rotate() {
     undraw();
     currentRotation++;
@@ -167,18 +166,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const displayWidth = 4;
   const displayIndex = 0;
 
-  // the Tetrominos without rotations
   const upNextTetrominoes = [
-    [1, displayWidth + 1, displayWidth * 2 + 1, 2], // lTetromino
-    [0, displayWidth, displayWidth + 1, displayWidth * 2 + 1], // zTetromino
-    [1, displayWidth, displayWidth + 1, displayWidth + 2], // tTetromino
-    [0, 1, displayWidth, displayWidth + 1], // oTetromino
-    [1, displayWidth + 1, displayWidth * 2 + 1, displayWidth * 3 + 1] // iTetromino
+    [1, displayWidth + 1, displayWidth * 2 + 1, 2],
+    [0, displayWidth, displayWidth + 1, displayWidth * 2 + 1],
+    [1, displayWidth, displayWidth + 1, displayWidth + 2],
+    [0, 1, displayWidth, displayWidth + 1],
+    [1, displayWidth + 1, displayWidth * 2 + 1, displayWidth * 3 + 1]
   ];
 
-  // display the shape in the mini-grid display
   function displayShape() {
-    // remove any trace of a tetromino form the entire grid
     displaySquares.forEach((square) => {
       square.classList.remove('tetromino');
       square.style.backgroundColor = '';
@@ -189,7 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // add functionality to the button
   startBtn.addEventListener('click', () => {
     if (timerId) {
       clearInterval(timerId);
@@ -202,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  // add score
   function addScore() {
     for (let i = 0; i < 199; i += width) {
       const row = [i, i + 1, i + 2, i + 3, i + 4, i + 5, i + 6, i + 7, i + 8, i + 9];
@@ -222,7 +216,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // game over
   function gameOver() {
     if (current.some((index) => squares[currentPosition + index].classList.contains('taken'))) {
       scoreDisplay.innerHTML = 'end';
