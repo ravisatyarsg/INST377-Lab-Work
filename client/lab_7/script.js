@@ -1,4 +1,3 @@
-//let mymap = null
 function mapInit()  {
   let mymap = L.map('mapid').setView([38.989, -76.93], 12);
 
@@ -12,7 +11,6 @@ function mapInit()  {
   }).addTo(mymap);  
   return mymap
 }
-//mapInit()
 
 async function windowActions()  {
     const endpoint = 'https://data.princegeorgescountymd.gov/resource/umjn-t2iz.json';
@@ -29,23 +27,15 @@ async function windowActions()  {
     }
     
     function displayMatches(event) {
-      //const markers = L.markerClusterGroup()
-      //markers.clearLayers()
-      //mymap.clearLayers()
-      //mymap.layers = []
       const matchArray = findMatches(event.target.value, restaurants);
       matchArray.slice(0,5)
       matchArray.forEach(element => {
         let coordinates = element.geocoded_column_1.coordinates.reverse()
-         //console.log(coordinates)
+        console.log(coordinates)
         L.marker(coordinates).addTo(mymap);
 
      })
-     //mymap.setView([38.989, -76.93], 12);
       const html = matchArray.map(place => {
-        //const regex = new RegExp(event.target.value, 'gi');
-        //const restaurantName = place.name.replace(regex, `<span class="hl">${event.target.value}</span>`);
-        //const zipcode = place.zip.replace(regex, `<span class="hl">${event.target.value}</span>`);
         return `
           <li class = 'box'>
             <span class="name">${place.name}</span>
