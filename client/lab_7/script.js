@@ -28,14 +28,14 @@ async function windowActions()  {
     
     function displayMatches(event) {
       const matchArray = findMatches(event.target.value, restaurants);
-      matchArray.slice(0,5)
-      matchArray.forEach(element => {
+      matchSlice = matchArray.slice(0,5)
+      matchSlice.forEach(element => {
         let coordinates = element.geocoded_column_1.coordinates.reverse()
         console.log(coordinates)
         L.marker(coordinates).addTo(mymap);
 
      })
-      const html = matchArray.map(place => {
+      const html = matchSlice.map(place => {
         return `
           <li class = 'box'>
             <span class="name">${place.name}</span>
